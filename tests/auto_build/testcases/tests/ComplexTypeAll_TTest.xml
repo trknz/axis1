@@ -1,0 +1,15 @@
+<test>
+    <name>ComplexTypeAll_TTest</name>
+    <description>ComplexTypeAll_TTest</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>ComplexTypeAll_TTestClient.cpp</clientCode>
+    <wsdl>ComplexTypeAll.wsdl</wsdl>
+    <expected>
+        <output>
+            ComplexTypeAll_TTest.expected
+        </output>	
+    </expected>
+	<endpoint>http://localhost:80/axis/ComplexTypeAll</endpoint>
+	<nomonitor>true</nomonitor>
+	<notrace>true</notrace>
+</test>

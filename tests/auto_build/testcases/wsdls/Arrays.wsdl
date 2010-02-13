@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:tns="http://org.apache.axis/Arrays/"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="Arrays"
+	targetNamespace="http://org.apache.axis/Arrays/">
+	<wsdl:types>
+		<xsd:schema targetNamespace="http://org.apache.axis/Arrays/"
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+			<xsd:element name="simpleArrayResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="simpleType" type="xsd:int"
+							maxOccurs="unbounded" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="simpleArray">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="simpleType" type="xsd:int"
+							maxOccurs="unbounded" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:complexType name="ComplexTypeWithSimpleArray">
+				<xsd:sequence>
+					<xsd:element name="simpleType" type="xsd:int" maxOccurs="unbounded"/>
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:complexType name="ComplexTypeWithSimpleElement">
+				<xsd:sequence>
+					<xsd:element name="simpleType" type="xsd:int"/>
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:complexType name="ComplexTypeWithComplexArray">
+				<xsd:sequence>
+					<xsd:element name="complexTypeWithSimpleElement" type="tns:ComplexTypeWithSimpleElement" maxOccurs="unbounded"/>
+				</xsd:sequence>
+			</xsd:complexType>
+
+            <xsd:element name="complexTypeWithSimpleArrayResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="ComplexTypeWithSimpleArray"
+							type="tns:ComplexTypeWithSimpleArray">
+						</xsd:element>
+					</xsd:sequence>
+				</xsd:complexType>
+            </xsd:element>
+            <xsd:element name="complexTypeWithSimpleArray">
+            	<xsd:complexType>
+            		<xsd:sequence>
+            			<xsd:element name="complexTypeWithSimpleArray"
+            				type="tns:ComplexTypeWithSimpleArray">
+            			</xsd:element>
+            		</xsd:sequence>
+            	</xsd:complexType>
+            </xsd:element>
+            <xsd:element name="complexTypeArrayResponse">
+            	<xsd:complexType>
+            		<xsd:sequence>
+            			<xsd:element name="complexTypeWithSimpleElement"
+            				type="tns:ComplexTypeWithSimpleElement" maxOccurs="unbounded">
+            			</xsd:element>
+            		</xsd:sequence>
+            	</xsd:complexType>
+            </xsd:element>
+            <xsd:element name="complexTypeArray">
+            	<xsd:complexType>
+            		<xsd:sequence>
+            			<xsd:element name="complexTypeWithSimpleElement"
+            				type="tns:ComplexTypeWithSimpleElement" maxOccurs="unbounded">
+            			</xsd:element>
+            		</xsd:sequence>
+            	</xsd:complexType>
+            </xsd:element>
+            <xsd:element name="complexTypeWithComplexArrayResponse">
+            	<xsd:complexType>
+            		<xsd:sequence>
+						<xsd:element name="complexTypeWithComplexArray" type="tns:ComplexTypeWithComplexArray"/>
+					</xsd:sequence>
+            	</xsd:complexType>
+            </xsd:element>
+            <xsd:element name="complexTypeWithComplexArray">
+            	<xsd:complexType>
+            		<xsd:sequence>
+						<xsd:element name="complexTypeWithComplexArray" type="tns:ComplexTypeWithComplexArray"/>
+					</xsd:sequence>
+            	</xsd:complexType>
+            </xsd:element>
+            <xsd:complexType name="MoreComplexType">
+				<xsd:sequence>
+					<xsd:element name="simpleString" type="xsd:string"/>
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="moreComplexTypeArrayResponse">
+            	<xsd:complexType>
+            		<xsd:sequence>
+            			<xsd:element name="moreComplexType"
+            				type="tns:MoreComplexType" maxOccurs="unbounded">
+            			</xsd:element>
+            		</xsd:sequence>
+            	</xsd:complexType>
+            </xsd:element>
+            <xsd:element name="moreComplexTypeArray">
+            	<xsd:complexType>
+            		<xsd:sequence>
+            			<xsd:element name="moreComplexType"
+            				type="tns:MoreComplexType" maxOccurs="unbounded">
+            			</xsd:element>
+            		</xsd:sequence>
+            	</xsd:complexType>
+            </xsd:element>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="simpleArrayResponse">
+		<wsdl:part element="tns:simpleArrayResponse"
+			name="simpleArrayResponse" />
+	</wsdl:message>
+	<wsdl:message name="simpleArrayRequest">
+		<wsdl:part element="tns:simpleArray"
+			name="simpleArray" />
+	</wsdl:message>
+	<wsdl:message name="complexTypeWithSimpleArrayResponse">
+		<wsdl:part name="complexTypeWithSimpleArrayResponse"
+			element="tns:complexTypeWithSimpleArrayResponse">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="complexTypeWithSimpleArrayRequest">
+		<wsdl:part name="complexTypeWithSimpleArrayRequest"
+			element="tns:complexTypeWithSimpleArray">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="complexTypeArrayResponse">
+		<wsdl:part name="complexTypeArrayResponse"
+			element="tns:complexTypeArrayResponse">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="complexTypeArrayRequest">
+		<wsdl:part name="complexTypeArrayRequest"
+			element="tns:complexTypeArray">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="complexTypeWithComplexArrayResponse">
+		<wsdl:part name="complexTypeWithComplexArrayResponse"
+			element="tns:complexTypeWithComplexArrayResponse">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="complexTypeWithComplexArrayRequest">
+		<wsdl:part name="complexTypeWithComplexArrayRequest"
+			element="tns:complexTypeWithComplexArray">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="moreComplexTypeArrayResponse">
+		<wsdl:part name="moreComplexTypeArrayResponse"
+			element="tns:moreComplexTypeArrayResponse">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="moreComplexTypeArrayRequest">
+		<wsdl:part name="moreComplexTypeArrayRequest"
+			element="tns:moreComplexTypeArray">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:portType name="Arrays">
+		<wsdl:operation name="simpleArray">
+			<wsdl:input message="tns:simpleArrayRequest" />
+			<wsdl:output message="tns:simpleArrayResponse" />
+		</wsdl:operation>
+		<wsdl:operation name="complexTypeWithSimpleArray">
+			<wsdl:input
+				message="tns:complexTypeWithSimpleArrayRequest">
+			</wsdl:input>
+			<wsdl:output
+				message="tns:complexTypeWithSimpleArrayResponse">
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="complexTypeArray">
+			<wsdl:input message="tns:complexTypeArrayRequest"></wsdl:input>
+			<wsdl:output message="tns:complexTypeArrayResponse"></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="complexTypeWithComplexArray">
+			<wsdl:input
+				message="tns:complexTypeWithComplexArrayRequest">
+			</wsdl:input>
+			<wsdl:output
+				message="tns:complexTypeWithComplexArrayResponse">
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="moreComplexTypeArray">
+			<wsdl:input message="tns:moreComplexTypeArrayRequest"></wsdl:input>
+			<wsdl:output message="tns:moreComplexTypeArrayResponse"></wsdl:output>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="ArraysSOAP" type="tns:Arrays">
+		<soap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="simpleArray">
+			<soap:operation
+				soapAction="Arrays#simpleArray" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="complexTypeWithSimpleArray">
+			<soap:operation style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="complexTypeArray">
+			<soap:operation style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="complexTypeWithComplexArray">
+			<soap:operation style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="moreComplexTypeArray">
+			<soap:operation style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="Arrays">
+		<wsdl:port binding="tns:ArraysSOAP" name="ArraysSOAP">
+			<soap:address location="http://localhost:80/axis/Arrays" />
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,17 @@
+<test>
+    <name>NilValuesTest</name>
+    <description>NilValuesTest</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>NilValuesTestClient.cpp</clientCode>
+    <wsdl>ComplexTypeAll.wsdl</wsdl>
+    <expected>
+        <output>
+            NilValuesTest.cpp.out
+        </output>
+		<request>
+			NilValuesTest.request
+		</request>
+		<serverResponse>NilValuesTest_ServerResponse.expected</serverResponse>
+    </expected>
+	<endpoint>-e http://localhost:80/axis/ComplexTypeAll</endpoint>
+</test>

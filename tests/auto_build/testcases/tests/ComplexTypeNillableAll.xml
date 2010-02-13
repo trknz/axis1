@@ -1,0 +1,19 @@
+<test>
+    <name>ComplexTypeNillableAll</name>
+    <description>ComplexTypeNillableAll</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>ComplexTypeNillableAllClient.cpp</clientCode>
+    <wsdl>ComplexTypeNillableAll.wsdl</wsdl>
+    <expected>
+        <output>
+            ComplexTypeNillableAll.cpp.out
+        </output>
+		<request>
+			ComplexTypeNillableAll_Request.expected
+		</request>
+		<serverResponse>
+			ComplexTypeNillableAll_ServerResponse.expected
+		</serverResponse>
+    </expected>
+	<endpoint>-e http://localhost:80/axis/ComplexTypeNillableAll</endpoint>
+</test>

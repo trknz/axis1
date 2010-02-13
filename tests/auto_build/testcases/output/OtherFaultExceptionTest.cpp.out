@@ -1,0 +1,13 @@
+
+
+Trying to div 10 by 0
+Fault Detail - Division by zero exception
+
+
+Trying to div 1000 by 5
+Fault Detail - You have entered 1000 for the first parameter. 1000 is reserved. Please do not use it
+
+
+Trying to div 10 by -5
+Fault Detail - Out of bounds exception
+---------------------- TEST COMPLETE -----------------------------

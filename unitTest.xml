@@ -1,0 +1,72 @@
+<project name="unitTest" default="runUnitTests">
+	<description>
+		This file runs what we have termed the "unit tests". They are not unit tests in a true sense of the word rather they run a set of 
+		tests against a "mock server". This is a Java program that given a request will return back a given response file. Thus this system is useful for
+		testing where we do not have an actual service written but have the tcp monitor request and response files. From these we can write a test quickly and easily and place it into
+		the unit test suite which avoids us having to create a large number of potentially complex services when time might not allow this.
+			
+		This system is essentially the same as the fv suite except for the fact that the endpoint is not
+		a server but the mock-server. In order to run this system several things have to be set up in advance e.g.
+		the response files. For more inforamtion about set up of a new test please read the document ws-axis/c/tests/auto_build/UnitTest_Readme.txt.
+		
+		In order to run the already created unit tests please run Ant against this build file giving the same properties as you do for 
+		the fv suite in order for the suite to find your libraries. NOTE: This system does not handle ssl tests.
+	</description>
+	<import file="./test.xml"/>
+	
+	<target name="runUnitTests" depends="checkEnvironment">
+		<antcall target="unitTestClient">
+			<param name="unit.test.list" value="${basedir}/tests/auto_build/testcases/unitTest.list"/>
+		</antcall>
+	</target>
+	
+	<target name="unitTestClient" depends="addSamplesToUnitTests">
+		<description>
+			This target calls the fv suite as usual except for the fact that unit test flags
+				and properties are switched on.
+			This means that the client is being used against a fake server and the unitTest.list file is used
+				instead of any *test.list* property set by the user
+		</description>
+		<!-- ******************************************************************************************** -->
+		<!-- In order to run the system in mockserver (unittest) mode we have to override some properties -->
+		<!-- override the test.list if it's already been set -->
+		<!-- replace all of test.list's backslashes slashes as this ruins the proper regex -->
+		<propertyregex property="test.list" override="true" input="${test.list}" regexp="\\" replace="/"/>
+		<propertyregex property="test.list" override="true" input="${test.list}" regexp=".*" replace=""/>
+		<!-- have to replace all the single backslashes in unit.test.list so that the replace works OK -->
+		<propertyregex property="unit.test.list" override="true" input="${unit.test.list}" regexp="\\" replace="/"/>
+		<propertyregex property="test.list" override="true" input="${test.list}" regexp=".*" replace="${unit.test.list}" defaultValue="${unit.test.list}"/>
+		
+		<!--  dir.testproperties must be set to the correct tree -->
+		<!-- replace all of dir.testproperties backslashes slashes as this ruins the proper regex -->
+		<propertyregex property="dir.testproperties" override="true" input="${dir.testproperties}" regexp="\\" replace="/"/>
+		<propertyregex property="dir.testproperties" override="true" input="${dir.testproperties}" regexp=".*" replace=""/>
+		<!-- have to replace all the single backslashes in unit.test.list so that the replace works OK -->
+<!-- 	<propertyregex property="unit.test.list" override="true" input="${unit.test.list}" regexp="\\" replace="/"/> -->
+		<propertyregex property="dir.testproperties" override="true" input="never find this" regexp="a" replace="${basedir}/tests/auto_build/testcases/tests" defaultValue="${basedir}/tests/auto_build/testcases/tests"/>
+		<echo message="${dir.testproperties} DIRTESTPROPS"/>
+
+
+		<!-- ******************************************************************************************** -->
+		<!-- replace any previously set up mockserver with value true -->
+		<propertyregex property="mockServer" override="true" input="${mockServer}" regexp="false" replace="true" defaultValue="true"/>
+		<!-- now call the fv suite as usual -->
+		<antcall target="testSuite" inheritall="true"/>
+	</target>
+	
+	<target name="addSamplesToUnitTests">
+		<description>
+			We expose several samples but three in particular. Calculator, testHandler and echoStringHeaderHandler. However, we should make sure that these are
+			tested on a daily basis. This target copies those tests from the source tree into the samples tree ready for unit test to run. I have added these to the unit tests here but they should also be run as services too.
+		</description>
+		<!-- copy over the calculator sample client to the clients test directory -->
+		<copy file="${basedir}/samples/client/calculator/Client.cpp" tofile="${dir.autotests}/client/cpp/CalculatorClient.cpp"/>
+	</target>
+	
+	<target name="checkEnvironment" depends="initialize">
+		<echo message="Please ensure that you have set xmlParserLibraryName = ${xerces.xmlParserLibraryName} an XMLParser home depending on what your parser is"/>
+	</target>
+	
+
+</project>
+

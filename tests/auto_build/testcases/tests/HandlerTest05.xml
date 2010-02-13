@@ -1,0 +1,21 @@
+<test>
+    <name>HandlerTest5</name>
+    <description>Test IMessageData->(gs)etProperty AxisChar* property in a handler</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>CalculatorDocClient.cpp</clientCode>
+    <wsdl>CalculatorDoc.wsdl</wsdl>
+    <expected>
+        <output>
+            CalculatorDoc.cpp.out
+        </output>
+    </expected>
+    <handler>
+        <directory>
+            handler_test5
+        </directory>
+       <service>
+           CalculatorDoc
+       </service>
+    </handler>
+	<endpoint>http://localhost:80/axis/CalculatorDoc</endpoint>
+</test>

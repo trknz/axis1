@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- The Entity, wspath in the following internal subset allows setting a path for the webservices location -->
+<!DOCTYPE vars [ <!ENTITY wspath "/home/sanjaya/Axis/webservices/"> ]>
+
+<deployment xmlns="http://xml.apache.org/axis/wsdd/" xmlns:C="http://xml.apache.org/axis/wsdd/providers/C" xmlns:CPP="http://xml.apache.org/axis/wsdd/providers/CPP">
+	<globalConfiguration>
+	</globalConfiguration>
+
+	
+	<service name="array" provider="CPP:DOCUMENT" description="This is an Axis C++ web service for Symple Type Array which return an array of elements. This is a DOCUMENT style service.">
+		<parameter name="className" value="/home/obj/samples/libarray.so"/>
+	</service>
+
+	<service name="calculator" provider="CPP:RPC" description="This is an Axis C++ Service to demonstrate Calculator. This will support addition (add) subtraction (sub) multiplication (mul) division (div). This is a RPC style service.">
+		<parameter name="className" value="/home/obj/samples/libcalculator.so" />
+	</service>
+
+	<service name="base" provider="CPP:RPC" description="This is an Axis C++ web service for Base which is use to demonstrate Complex data types. SOAPBuilders Interoperability Lab Round 2 base test suite described at http://www.whitemesa.com/interop/proposal2.html. This is a RPC style service.">
+		<parameter name="className" value="/home/obj/samples/libbase.so"/>
+	</service>
+
+	<service name="transportProperties" provider="CPP:DOCUMENT" description="This is an Axis C++ web service for demonstrate transport property. This is a DOCUMENT style service.">
+		<parameter name="className" value="/home/obj/samples/libtransportProperties.so"/>
+	</service>
+
+	<service name="bench" provider="CPP:DOCUMENT" description="This is an Axis C++ web service for demonstrate Axis Bench which is use to demonstrate Complex data types. This is a DOCUMENT style service.">
+		<parameter name="className" value="/home/obj/samples/libbench.so"/>
+	</service>
+
+	<service name="element" provider="CPP:DOCUMENT" description="This is an Axis C++ web service for demonstrate XSD Element which is use XSD data types. This is use setmethods to retrieve XSD data types. This is a DOCUMENT style service.">
+		<parameter name="className" value="/home/obj/samples/libelement.so"/>
+	</service>
+
+	<service name="enumeration" provider="CPP:DOCUMENT" description="This is an Axis C++ web service for Enumeration demonstrate enum data type. This is a DOCUMENT style service.">
+		<parameter name="className" value="/home/obj/samples/libenumeration.so"/>
+	</service>
+
+	<service name="doclitfault" provider="CPP:DOCUMENT" description="This is an Axis C++ web service for demonstrate fault value handling in DOCUMENT style service.">
+		<parameter name="className" value="/home/obj/samples/libdoclitfault.so"/>
+	</service>
+
+	<service name="rpcfault" provider="CPP:RPC" description="This is an Axis C++ web service for demonstrate fault value handling in RPC style service">
+		<parameter name="className" value="/home/obj/samples/librpcfault.so"/>
+	</service>
+
+	<service name="ref" provider="CPP:RPC" description="This is an Axis C++ web service for demonstrate Value Pass by Reference. This is a RPC style service. ">
+		<parameter name="className" value="/home/obj/samples/libref.so"/>
+	</service>
+
+	<service name="groupB" provider="CPP:RPC" description="This is an Axis C++ web service for demonstrate Interop test. This is a RPC style service. ">
+		<parameter name="className" value="C:\obj\samples\server\groupB\libgroupB.so"/>
+	</service>
+
+
+</deployment>

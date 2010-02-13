@@ -1,0 +1,14 @@
+<test>
+    <name>PrimitiveAndArray</name>
+    <description>PrimitiveAndArray</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>PrimitiveAndArrayClient.cpp</clientCode>
+    <wsdl>PrimitiveAndArray.wsdl</wsdl>
+    <expected>
+        <output>
+            PrimitiveAndArray.expected
+        </output>
+		<serverResponse>PrimitiveAndArray_ServerResponse.expected</serverResponse>
+    </expected>
+	<endpoint>http://localhost:80/axis/PrimitiveAndArray</endpoint>
+</test>

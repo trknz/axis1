@@ -1,0 +1,108 @@
+<project name="initializeServer" default="decideserverproperties" basedir="..">
+	<import file="${basedir}/build/Initialize.xml"/>
+	<import file="${basedir}/build/buildInitialize.xml"/>
+	<import file="${basedir}/build/testInitialize.xml"/>
+
+	<property file="${basedir}/build/deploy.properties"/>
+	
+    <target name="decideserverproperties" depends="initialize, initializeTest, initializeTest">
+
+        <property name="wsdd.file" value="${dir.test.generated}${file.separator}server${file.separator}server.wsdd" />
+
+        <if>
+            <isset property="windows" />
+            <then>
+                <echo message="we are in windows" />
+
+                <!-- environment variables start from here in pairs -->
+                <property name="serverenv.env" value="PATH" />
+                <property name="serverenv.env.value" value="${java.library.path};${dir.libraries};${dir.xmlParser}" />
+
+                <!-- The path to axiscpp.conf -->
+                <!-- Set location of axiscpp.conf file -->
+                <property name="axiscppconffile" value="${axiscpp_deploy}/server/axiscpp.conf" />
+                  
+                <if>
+                    <istrue value="${server.apache1}" />
+                    <then>
+                        <property name="serverexecutable" value="${env.APACHE_HOME}\apache" />
+                        <property name="startargs" value="-k start" />
+                        <property name="stopargs" value=" -k stop" />
+
+                    </then>
+                    <else>
+                        <if>
+                            <istrue value="${server.apache2}" />
+                            <then>
+                                <property name="serverexecutable" value="${env.APACHE2_HOME}\bin\apache" />
+                                <property name="startargs" value=" " />
+                            </then>
+                            <elseif>
+                                <istrue value="${server.simpleaxisserver}" />
+                                <then>
+                                    <property name="serverexecutable" value="${dir.release}/bin/${simpleAxisServerExecutableName}${executableSuffix}" />
+                                    <property name="startargs" value=" ${testPort}" />
+                                </then>
+                            </elseif>
+                        </if>
+   </else>
+                </if>
+            </then>
+            <else>
+                 <if>
+                <isset property="linux" />
+                <then>
+                    <echo message="we are in linux" />
+
+                    <!-- environment variables start from here in pairs -->
+                    <property name="serverenv.env" value="LD_LIBRARY_PATH" />
+                    <property name="serverenv.env.value" value="${dir.libraries}:${dir.xmlParser}" />
+                  
+
+               </then>
+               <elseif>
+                 <isset property="aix" />
+                <then>
+
+<echo  message="we are in AIX" />
+
+
+                    <!-- environment variables start from here in pairs -->
+                    <property name="serverenv.env" value="LIBPATH" />
+                    <property name="serverenv.env.value" value="${dir.libraries}:${dir.xmlParser}" />
+                </then>
+                </elseif>
+                </if>
+	  <!-- The path to axiscpp.conf -->
+   <property name="axiscppconffile" value="${axiscpp_deploy}/server/etc/axiscpp.conf" />   
+
+                    <if>
+                        <istrue value="${server.apache1}" />
+                        <then>
+                            <property name="serverexecutable" value="${env.APACHE_HOME}/bin/apachectl" />
+                            <property name="startargs" value=" start" />
+                            <property name="stopargs" value=" stop"/>
+                        </then>
+                        <else>
+                            <if>
+                                <istrue value="${server.apache2}"/>
+                                <then>
+   <property name="serverexecutable" value="${env.APACHE2_HOME}/bin/apachectl"/>
+                                    <property name="startargs" value=" start"/>
+                                    <property name="stopargs" value=" stop"/>
+                                </then>
+                                <elseif>
+                                    <istrue value="${server.simpleaxisserver}"/>
+                                    <then>
+                                        <property name="serverexecutable" value="${dir.release}/bin/${simpleAxisServerExecutableName}${executableSuffix}"/>
+                                        <property name="startargs" value=" ${testPort}"/>
+                                    </then>
+                                </elseif>
+                            </if>
+                        </else>
+                    </if>
+            </else>
+        </if>
+    </target>
+	
+</project>

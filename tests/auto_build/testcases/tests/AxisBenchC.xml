@@ -1,0 +1,14 @@
+<test>
+    <name>AxisBenchC</name>
+    <description>AxisBenchC</description>
+    <clientLang>c</clientLang>
+    <clientCode>AxisBenchClient.c</clientCode>
+    <wsdl>AxisBench.wsdl</wsdl>
+    <expected>
+        <output>
+            AxisBench.cpp.out
+        </output>
+		<serverResponse>AxisBench_ServerResponse.expected</serverResponse>
+    </expected>
+	<endpoint>-e http://localhost:80/axis/AxisBench</endpoint>
+</test>

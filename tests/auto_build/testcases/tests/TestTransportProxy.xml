@@ -1,0 +1,19 @@
+<test>
+    <name>TestTransportProxy</name>
+    <description>TestTransportProxy</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>TestTransportProxyClient.cpp</clientCode>
+    <wsdl>CalculatorDoc.wsdl</wsdl>
+	<proxyRequired>true</proxyRequired>
+    <expected>
+        <output>
+            TestTransportProxy.expected
+        </output>
+        <request>
+            TestTransportPropertiesRequest.out
+                </request>
+    </expected>
+        <endpoint>http://localhost:80/axis/CalculatorDoc</endpoint>
+	<nomonitor>true</nomonitor>
+</test>
+

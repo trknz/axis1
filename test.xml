@@ -1,0 +1,175 @@
+<project name="test" default="testSuite">
+
+	<import file="${basedir}/build/buildInitialize.xml"/>
+	<import file="${basedir}/build/testOverride.xml"/>
+	<import file="${basedir}/build/testInitialize.xml"/>
+	<import file="${basedir}/build/buildTest.xml"/>
+	<import file="${basedir}/build/validateTest.xml"/>
+	<import file="${basedir}/build/buildHandler.xml"/>
+	<import file="${basedir}/build/executeTest.xml"/>
+	<import file="${basedir}/build/buildMonitor.xml"/>
+	<import file="${basedir}/build/buildLibrary.xml"/>
+
+
+	<!--
+	  Default target that set all the required framework to build, run and report on the tests
+	  -->
+	<target name="testSuite" depends="preInitializeTest, overrideTest, initialize, initializeTest, compileMonitorUtility, moveMonitorJar, initializeLogFile, runTests, displayAllResults"
+	 description="Build and Run all tests"/>
+
+	<target name="preInitializeTest" depends="pre-init">
+		<echo message="dir.properties = ${dir.properties} - ${platform}"/>
+		<property file="${dir.properties}/test.${platform}.properties" />
+		<property file="${dir.properties}/test.common.properties" />
+		<property name="dir.xmlParser" value="${env.XERCES_HOME}/bin${path.separator}${env.XERCES_HOME}/lib"/>
+	</target>
+	
+	
+	<target name="moveMonitorJar" depends="initialize, compileMonitorUtility">
+		<description>
+		The monitor utility is built in its source directory. This is not good as when you do a cvs update this always comes back as a 
+	difference. So, as the monitor is only built when a test is run, this is the right place to move it from there to the 
+	obj directory so it does not interfere with the cvs update process.
+		</description>
+		<!-- moving the monitor fails if it's been used already so set "failonerror=false"-->
+		<move todir="${dir.obj}/test/monitor" failonerror="false">
+			<fileset dir="${basedir}/tests/utils/monitor">
+				<include name="**/*.class"/>
+				<include name="*.jar"/>
+			</fileset>
+		</move>
+	</target>
+	
+	
+
+	<!--
+	  Loop through all the test xml properties files in the tests
+	  list and call runTest target
+	  -->
+	<target name="runTests" depends="setTestList, defineMonitor, defineMockServer">
+		<foreach target="runTest" param="test_property" inheritall="true">
+			<path refid="test_properties"/>
+		</foreach>
+		<!-- we need to stop the monitor (if there is any) -->
+		<antcall target="stopMonitor" inheritall="true" />
+		
+		<!-- if we are running in mockserver mode then we need to stop the MockServer -->
+				<if>
+			<equals arg1="${mockServer}" arg2="true" />
+			<then>
+				<antcall target="stopMockServer"
+					inheritall="true" />
+			</then>
+		</if>
+	</target>
+
+	<!--
+	  Set the list of tests to run to either all tests, an individual test, or a selection of tests
+	  -->
+	<target name="setTestList" depends="setListType,setIndividual,setFromList,setAll"/>
+
+	<target name="setListType">
+		<condition property="allTest">
+			<and>
+				<not>
+					<isset property="test.name"/>
+				</not>
+				<not>
+					<isset property="test.list"/>
+				</not>
+			</and>
+		</condition>
+	</target>
+
+	<!--
+	  Create a list of all the tests
+	  -->
+	<target name="setAll" if="allTest">
+		<path id="test_properties">
+			<fileset dir="${dir.testproperties}" includes="*.xml"/>
+		</path>
+	</target>
+
+	<!--
+	  Create a list of just 1 test from command line parameter -Dtest.name=
+	  -->
+	<target name="setIndividual" if="test.name">
+		<echo message="setIndividual ${test.name}"/>
+		<path id="test_properties">
+			<fileset dir="${dir.testproperties}" includes="${test.name}.xml"/>
+		</path>
+	</target>
+
+	<!--
+	  Create a list of tests from a properties file unless an individual test has been specified too
+	  -->
+	<target name="setFromList" if="test.list" unless="test.name">
+		<if>
+			<isset property="test.exclude.list"/>
+			<then>
+				<path id="test_properties">
+					<fileset dir="${dir.testproperties}" includesfile="${test.list}" excludesfile="${test.exclude.list}"/>
+				</path>
+			</then>
+			<else>
+				<path id="test_properties">
+					<fileset dir="${dir.testproperties}" includesfile="${test.list}"/>
+				</path>
+			</else>
+		</if>
+	</target>
+
+	<!--
+	  For the specified test_property test load the properties files and derive
+	  any other required properties, compile the test client, set the endpoint
+	  if required, run the test, and validate if successful.
+	  * setPropertiesForTest is in testInitialize.xml
+	  * validateTest is in validateTest.xml
+	  -->
+	<target name="runTest" depends="setPropertiesForTest,cleanTest,buildTest,executeTestRun,validateTest"/>
+
+	<target name="cleanTest">
+		<delete dir="${dir.test.generated}/${test.clientLang}/${test.name}"/>
+	</target>
+
+	<!--
+	  Build test
+	  -->
+	<target name="buildTest" depends="setPropertiesForThisTest, compileTestClient, validateClientCompilation, compileHandlers"/>
+
+	<target name="setPropertiesForThisTest" depends="checkIfRequestFile">
+		<property name="test.directory" value="${dir.test.generated}/${test.clientLang}/${test.name}"/>
+		<property name="expected.file" value="${test.directory}/${test.name}.expected"/>
+		<property name="r_expected.file" value="${test.directory}/${test.name}Request.expected"/>
+		<property name="response_expected.file" value="${test.directory}/${test.name}ServerResponse.expected"/>
+		<property name="results.stdout" value="${test.directory}/${test.name}.out"/>
+		<property name="results.stderr" value="${test.directory}/${test.name}.err"/>
+	</target>
+
+	<target name="checkIfRequestFile" if="test.expected.request" unless="test.nomonitor">
+		<available file="${dir.autotests}/output/${test.expected.request}" property="requestFileExists"/>
+	</target>
+
+	<target name="compileTestClient">
+		<antcall target="compileClient" inheritall="true">
+			<param name="wsdl.test" value="${dir.autotests}/wsdls/${test.wsdl}"/>
+			<param name="client.code" value="${dir.autotests}/client/${test.clientLang}/${test.clientCode}"/>
+		</antcall>
+	</target>
+
+	<target name="executeTestRun">
+		<antcall target="executeTest" inheritall="true">
+			<param name="test.directory" value="${dir.test.generated}/${test.clientLang}/${test.name}"/>
+		</antcall>
+	</target>
+
+	<!--
+	  When the test run has finished display the results file
+	  -->
+	<target name="displayAllResults">
+		<loadfile property="results" srcFile="${results.log}"/>
+		<echo message="${results}"/>
+	</target>
+
+
+</project>

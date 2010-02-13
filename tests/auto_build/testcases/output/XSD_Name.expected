@@ -1,0 +1,12 @@
+non-nillable element=xml.si-mple_nam:e
+empty non-nillable element=<empty>
+nillable element=xml.si-mple_nam:e
+empty nillable element=<empty>
+nil element=<nil>
+required attribute=xml.si-mple_nam:e
+empty required attribute=<empty>
+array of 2 elements
+  element[0]=xml.si-mple_nam:e
+  element[1]=xml.si-mple_nam:e
+within complex type=xml.si-mple_nam:e
+---------------------- TEST COMPLETE -----------------------------

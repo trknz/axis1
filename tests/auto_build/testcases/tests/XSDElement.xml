@@ -1,0 +1,17 @@
+<test>
+    <name>XSDElement</name>
+    <description>Test sending and receiving all the xsd types as an element</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>XSDElementClient.cpp</clientCode>
+    <wsdl>XSDElement.wsdl</wsdl>
+    <expected>
+        <output>
+            XSDElement.expected
+        </output>
+		<serverResponse>
+			XSDElement_ServerResponse.expected
+	    </serverResponse>
+    </expected>
+	<endpoint>http://localhost:80/axis/XSDElement</endpoint>
+</test>
+

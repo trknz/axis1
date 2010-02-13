@@ -1,0 +1,86 @@
+<project name="Axis C Server Engine" default="compileAxisServerEngine" basedir="..">
+
+	<!--
+	  Compile the Axis Server Library
+	  -->
+	<target name="compileAxisServerEngine">
+		<mkdir dir="${dir.objects}"/>
+		<mkdir dir="${dir.bin}"/>
+        <antcall target="buildVersionResource" inheritall="true">
+            <param name="internalName" value="${serverEngineLibraryName}"/>
+        </antcall>      
+		<if>
+			<not>
+				<isset property="aix"/>
+			</not>
+			<then>
+				<cc outfile="${dir.bin}/${serverEngineLibraryName}" objdir="${dir.objects}"
+				 exceptions="true" outtype="shared" multithreaded="true">
+				  	<!-- Compilers -->
+					<compiler refid="SolarisCC"/>
+					<compiler refid="Linuxgcc"/>
+                    <compiler refid="HP-UXaC++"/>            
+					<compiler extends="VisualC++">
+						<defineset>
+							<define name="DYNALIB_EXPORTS"/>
+						</defineset>
+					</compiler>
+                    <compiler refid="OS400icc"/>
+
+					<!-- Linkers -->
+					<linker refid="SolarisLinker"/>
+					<linker refid="LinuxLinker"/>
+                    <linker refid="HP-UXLinker"/>            
+					<linker refid="VisualC++Linker"/>
+                    <linker refid="OS400Linker"/>
+					<!-- Files to be compiled -->
+					<fileset dir="${dir.src}">
+						<include name="common/*.cpp"/>
+						<include name="engine/*.cpp"/>
+						<include name="engine/server/*.cpp"/>
+						<include name="soap/*.cpp"/>
+						<include name="soap/xsd/*.cpp"/>
+						<include name="soap/xsd/constraints/*.cpp"/>
+						<include name="soap/*.c"/>
+						<include name="wsdd/*.cpp"/>
+						<include name="xml/*.cpp"/>
+						<include name="platforms/windows/*.cpp" if="windows"/>
+						<include name="platforms/unix/*.cpp" if="linux"/>
+						<include name="platforms/unix/*.cpp" if="solaris"/>
+						<include name="platforms/os400/PlatformSpecificOS400.cpp" if="os400"/>
+						<!-- The following files need to be excluded @Adrian - query these! -->
+						<exclude name="common/Packet.cpp"/>
+						<exclude name="common/AxisSocketUtils.cpp"/>
+					</fileset>
+				</cc>
+			</then>
+			<else>
+				<cc outfile="${dir.bin}/${libraryPrefix}${serverEngineLibraryName}${librarySuffix}" objdir="${dir.objects}"
+				 exceptions="true" multithreaded="true">
+				  	<!-- Compilers -->
+					<compiler refid="AIXxlc"/>
+
+					<!-- Linkers -->
+					<linker refid="AIXLinker"/>
+					<!-- Files to be compiled -->
+					<fileset dir="${dir.src}">
+						<include name="common/*.cpp"/>
+						<include name="engine/*.cpp"/>
+						<include name="engine/server/*.cpp"/>
+						<include name="soap/*.cpp"/>
+						<include name="soap/*.c"/>
+						<include name="soap/xsd/*.cpp"/>
+						<include name="soap/xsd/constraints/*.cpp"/>
+						<include name="wsdd/*.cpp"/>
+						<include name="xml/*.cpp"/>
+						<include name="transport/axis/AxisTransportException.cpp"/>
+						<include name="platforms/unix/*.cpp"/>
+						<!-- The following files need to be excluded -->
+						<exclude name="common/Packet.cpp"/>
+						<exclude name="common/AxisSocketUtils.cpp"/>
+					</fileset>
+				</cc>
+			</else>
+		</if>
+	</target>
+</project>

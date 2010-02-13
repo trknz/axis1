@@ -1,0 +1,308 @@
+<project name="Apache Axis C" default="build" basedir=".">
+	<description>
+This ANT script compiles Apache AxisC runtime binaries, WSDL2Ws tooling and
+documentation.  To package a release deliverable use package.xml after building.
+
+This script is intended for use with Java 1.4+ and Apache ANT 1.6+.
+Ant is available from: http://ant.apache.org/
+
+To compile C/C++ code you will require the ant-contrib and cpptasks extensions to ANT, within:
+	[ant install dir]/lib
+These are available from: http://ant-contrib.sourceforge.net/
+        {Note: You will require both the cpptasks (v1.0beta3) and ant-contrib (v0.6) downloads }
+
+It is intended that the default target be used, which compiles and links all code
+and generates documentation.
+
+Within the build/ directory are a number of supporting scripts and property files.
+
+Associated with this build script are property files for each platform, the script
+will automatically determine the correct one to be used;
+	- build.Win32.properties
+	- build.Linux.properties
+	- build.AIX.properties
+	- build.SunOS.properties
+	- build.OS400.properties
+    - build.HP-UX.properties   
+Please use these to configure directories to suit the needs of your system.
+
+Notes:
+* The documentation target requires doxygen be installed and available on the system path
+  This is available from: http://www.doxygen.org
+* The following compilers will be required;
+	- Windows = Microsoft Visual C++ 6.0
+	- Linux   = gcc
+	- AIX     = Visual Age
+        - HP-UX   = aC++   
+	</description>
+
+	<import file="${basedir}/build/buildInitialize.xml"/>
+	<import file="${basedir}/build/buildClientC.xml"/>
+	<import file="${basedir}/build/buildClient.xml"/>
+	<import file="${basedir}/build/buildTransport.xml"/>
+	<import file="${basedir}/build/buildChannel.xml"/>
+	<import file="${basedir}/build/buildSSLChannel.xml"/>
+	<import file="${basedir}/build/buildXMLParser.xml"/>
+	<import file="${basedir}/build/buildServerEngine.xml"/>
+	<import file="${basedir}/build/buildApache13Module.xml"/>
+	<import file="${basedir}/build/buildApache20Module.xml"/>
+	<import file="${basedir}/build/buildSimpleAxisServer.xml"/>
+	<import file="${basedir}/build/buildWSDL2Ws.xml"/>
+	<import file="${basedir}/build/buildDocumentation.xml"/>
+	<import file="${basedir}/build/buildAdminClient.xml"/>
+    <import file="${basedir}/build/buildAdminService.xml"/>
+    <import file="${basedir}/build/buildAxisConfiguration.xml"/>
+
+    <target name="buildVersionResource" if="windows">
+        <delete>
+            <fileset dir="${basedir}/build">
+                <include name="version.res"/>
+                <include name="version.temp.rc"/>
+            </fileset>
+        </delete>   
+	    <copy todir="${basedir}/build">
+            <mapper type="glob" from="*.rc" to="*.temp.rc"/>      
+	        <filterset begintoken="&lt;" endtoken="&gt;">
+	            <filter token="Comments" value="${version.comments}"/>
+                <filter token="CompanyName" value="${version.CompanyName}"/>
+                <filter token="FileDescription" value="${version.FileDescription}"/>
+                <filter token="FileVersion" value="${version}"/>
+                <filter token="InternalName" value="${internalName}"/>
+                <filter token="LegalCopyright" value="${version.LegalCopyright}"/>
+                <filter token="LegalTrademarks" value="${version.LegalTrademarks}"/>
+                <filter token="OriginalFilename" value="${internalName}"/>
+                <filter token="PrivateBuild" value="${version.PrivateBuild}"/>
+                <filter token="ProductName" value="${version.ProductName}"/>
+                <filter token="ProductVersion" value="${version}"/>
+	        </filterset>
+	        <fileset dir="${basedir}/build">
+                <include name="version.rc"/>
+            </fileset>   
+	    </copy>
+        <exec executable="rc">
+<!--            <arg ="/fo '${basedir}/build/version.res' '${basedir}/build/version.temp.rc'"/>-->
+			<arg value="/fo"/>
+        	<arg value="${basedir}/build/version.res"/>
+        	<arg value="${basedir}/build/version.temp.rc"/>
+        </exec>
+    </target>
+
+
+    
+	<target name="compileClient">
+		<if>
+			<equals arg1="${client}" arg2="true"/>
+			<then>
+				<antcall target="compileAxisClient" inheritall="true"/>
+			</then>
+		</if>
+	</target>
+
+	<target name="buildDocumentation">
+		<if>
+			<equals arg1="${documentation}" arg2="true"/>
+			<then>
+				<antcall target="documentation" inheritall="true"/>
+			</then>
+		</if>
+	</target>
+
+	<target name="compileServer">
+		<if>
+			<equals arg1="${server}" arg2="true"/>
+			<then>
+				<antcall target="compileAxisServerEngine" inheritall="true"/>
+				<if>
+					<equals arg1="${server.apache13}" arg2="true"/>
+					<then>
+						<antcall target="compileApache13Module" inheritall="true"/>
+					</then>
+				</if>
+				<if>
+					<equals arg1="${server.apache20}" arg2="true"/>
+					<then>
+						<antcall target="compileApache20Module" inheritall="true"/>
+					</then>
+				</if>
+				<if>
+					<equals arg1="${server.simpleAxisServer}" arg2="true"/>
+					<then>
+						<antcall target="compileSimpleAxisServer" inheritall="true"/>
+					</then>
+				</if>
+                <if>
+                    <equals arg1="${server.adminService}" arg2="true"/>
+                    <then>
+                        <antcall target="compileAdminService" inheritall="true"/>
+                    </then>
+                </if>
+                <if>
+                    <and>
+                        <equals arg1="${server.adminClient}" arg2="true"/>
+                        <equals arg1="${client}" arg2="true"/>
+                    </and>
+                    <then>
+                        <antcall target="compileAdminClient" inheritall="true"/>
+                    </then>
+                </if>         
+			</then>
+		</if>
+	</target>
+
+	<target name="compileTransport">
+		<!-- Determine which flavour of transport to use -->
+		<!-- Ideally extend this to produce multiple flavours -->
+		
+
+		<if>
+			<equals arg1="${transport.HTTP}" arg2="true"/>
+			<then>
+				<antcall target="compileAxisTransport" inheritall="true">
+					<param name="transport" value="axis3"/>
+					<param name="transportLibraryName" value="${HTTP.transportLibraryName}"/>
+				</antcall>
+			</then>
+		</if>
+
+		<if>
+			<equals arg1="${HTTP.Channel}" arg2="true"/>
+			<then>
+				<antcall target="compileAxisHTTPTransportChannel" inheritall="true">
+					<param name="transport" value="axis3"/>
+					<param name="channel" value="HTTPChannel"/>
+					<param name="channelLibraryName" value="${HTTP.ChannelLibraryName}"/>
+				</antcall>
+			</then>
+		</if>
+
+		<if>
+			<equals arg1="${HTTP.SSLChannel}" arg2="true"/>
+			<then>
+				<antcall target="compileAxisHTTPTransportSSLChannel" inheritall="true">
+					<param name="transport" value="axis3"/>
+					<param name="channel" value="HTTPSSLChannel"/>
+					<param name="channelLibraryName" value="${HTTP.SecureChannelLibraryName}"/>
+				</antcall>
+			</then>
+		</if>
+	</target>
+
+      
+
+	<target name="compileXMLParser">
+		<!-- Determine which flavour of xmlParser to use -->
+		<!-- Ideally extend this to produce multiple flavours -->
+		<if>
+			<equals arg1="${xmlParser.xml4c}" arg2="true"/>
+			<then>
+				<antcall target="compileAxisXMLParser" inheritall="true">
+					<!-- We can re-use the Xerces parser layer for XML4C -->
+                    <param name="isXML4C" value="true"/>
+					<param name="xmlParser" value="xerces"/>
+					<param name="dir.xmlParser" value="${xml4c.dir.xmlParser}"/>
+					<param name="xmlParserLibrary" value="${xml4c.xmlParserLibrary}"/>
+					<param name="xmlParserLibraryName" value="${xml4c.xmlParserLibraryName}"/>
+				</antcall>
+			</then>
+		</if>
+		<if>
+			<equals arg1="${xmlParser.xerces}" arg2="true"/>
+			<then>
+				<antcall target="compileAxisXMLParser" inheritall="true">
+					<param name="xmlParser" value="xerces"/>
+					<param name="dir.xmlParser" value="${xerces.dir.xmlParser}"/>
+					<param name="xmlParserLibrary" value="${xerces.xmlParserLibrary}"/>
+					<param name="xmlParserLibraryName" value="${xerces.xmlParserLibraryName}"/>
+				</antcall>
+			</then>
+		</if>
+        <if>
+            <equals arg1="${xmlParser.guththila}" arg2="true"/>
+            <then>
+                <antcall target="compileAxisXMLParser" inheritall="true">
+                    <param name="xmlParser" value="guththila"/>
+                    <param name="dir.xmlParser" value="${guththila.dir.xmlParser}"/>
+                    <param name="xmlParserLibrary" value="${guththila.xmlParserLibrary}"/>
+                    <param name="xmlParserLibraryName" value="${guththila.xmlParserLibraryName}"/>
+                </antcall>
+            </then>
+        </if>
+	</target>
+
+	<target name="compile">
+		<antcall target="compileClient" inheritall="true"/>
+		<antcall target="compileTransport" inheritall="true"/>
+		<antcall target="compileXMLParser" inheritall="true"/>
+		<antcall target="compileServer" inheritall="true"/>
+		<antcall target="compileAxisConfiguration" inheritall="true"/>
+	</target>
+
+	<target name="buildAll" depends="compile, compileWSDL2Ws, buildWSDL2WsJARFile, buildCBindings, buildDocumentation"/>
+
+
+	<target name="build" depends="initialize"
+	 description="Build runtime libraries, WSDL2Ws tool and API Documentation">
+		<antcall target="buildAll" inheritall="true"/>
+	</target>
+
+	<target name="buildAndRunUnitTests" depends="initialize">
+		<description>
+			Calls the buildAll target and then runs the unit tests by calling the callRunUnitTests target.
+		</description>
+
+		<antcall target="buildAll" inheritall="true"/>
+
+		<antcall target="callRunUnitTests" inheritall="false">
+			<param name="dir.properties" value="${basedir}"/>
+			<param name="dir.obj" value="${dir.obj}"/>
+			<param name="dir.include" value="${dir.include}"/>
+		</antcall>
+	</target>
+	
+	
+	<target name="callRunUnitTests" depends="initialize">
+		<description>
+			This target calls the unit test.xml file with the correct properties that are 
+	a combination of whatever the build has been run with and a refresh from test properties and build properties.
+		</description>
+	
+		<!-- load platform specific test override properties -->
+		<property name="dir.release" value="${dir.obj}"/>
+		<property name="dir.wsdl2ws" value="${dir.release}/classes"/>
+		<property name="test.include" value="${dir.include}"/>
+		<property name="dir.xmlParser" value="${env.XERCES_HOME}/bin${path.separator}${env.XERCES_HOME}/lib"/>
+			
+		<property file="${dir.properties}/version.properties" />
+		<property file="${dir.properties}/test.${platform}.properties" />
+	
+		<!-- also need build.properties -->
+		<property file="${dir.properties}/build/build.${platform}.properties" />
+        <property file="${dir.properties}/build/build.common.properties" />
+
+		<ant dir="." antFile="unitTest.xml" inheritAll="true"/>
+	</target>
+
+	<target name="buildWithDebug" depends="initialize"
+	 description="Build runtime libraries (with debug symbols), WSDL2Ws tool and API Documentation">
+		<property name="debug" value="true"/>
+		<antcall target="build" inheritall="true"/>
+	</target>
+	
+	<!--
+	  Remove all generated artifaces
+	  -->
+	<target name="clean" depends="initialize" description="Remove all generated artifacts">
+		<!-- Delete trace instrumented C/C++ code -->
+		<delete dir="${dir.src.instrumented}"/>
+		<!-- Delete compiled C/C++ code -->
+		<delete dir="${dir.bin}"/>
+		<delete dir="${dir.objects}"/>
+		<delete dir="${dir.obj}/include"/>
+		<delete dir="${dir.obj}/src"/>
+		<!-- Delete compiled WSDL2Ws java classes -->
+		<delete dir="${dir.classes}"/>
+		<!-- Delete generated Documentation -->
+		<delete dir="${basedir}/docs/apidocs/html"/>
+		<delete dir="${basedir}/docs/apidocs/latex"/>
+	</target>
+</project>

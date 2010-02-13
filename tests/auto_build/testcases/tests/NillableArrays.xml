@@ -1,0 +1,18 @@
+<test>
+    <name>NillableArrays</name>
+    <description>NillableArrays</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>NillableArraysClient.cpp</clientCode>
+    <wsdl>NillableArrays.wsdl</wsdl>
+    <expected>
+        <output>
+            NillableArrays.expected
+        </output>
+        <request>
+            NillableArraysRequest.out
+        </request>
+		<serverResponse>NillableArrays_ServerResponse.expected</serverResponse>
+    </expected>
+	<endpoint>http://localhost:80/axis/NillableArrays</endpoint>
+</test>
+

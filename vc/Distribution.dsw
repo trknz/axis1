@@ -1,0 +1,185 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "AdminClient"=".\client\admin_client\AdminClient.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name AxisClient
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "AdminService"=".\server\admin_web_service\AdminService.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name AxisServer
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "Apache1_3Module"=".\server\apache1_3\Apache1_3Module.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name AxisServerDLL
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name AxisServer
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "Apache2_0Module"=".\server\apache2_0\Apache2_0Module.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name AxisServerDLL
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name AxisServer
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "Axis3Transport"=".\TRANSPORT\Axis3\Axis3.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "AxisClient"=".\AxisClientDLL.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "AxisServer"=".\AxisServerDLL.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "AxisXMLParserTspp"=".\xml\tspp\AxisXMLParserTspp.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "AxisXMLParserXerces"=".\xml\xerces\AxisXMLParserXerces.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "AxisXMLParserXml4c"=".\xml\xerces\AxisXMLParserXml4c.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "HTTPChannel"=".\transport\Axis3\HTTPChannel\HTTPChannel.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "SimpleAxisServer"=".\server\simple_axis_server\SimpleAxisServer.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name AxisServerDLL
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name AxisServer
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

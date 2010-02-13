@@ -1,0 +1,110 @@
+<project name="Axis C HTTP Transport SSL Channel" default="compileAxisHTTPTransportSSLChannel" basedir="..">
+
+   <!--
+    Compile the Axis HTTP Transport Channel Library
+    -->
+	 <target name="compileAxisHTTPTransportSSLChannel">
+      <mkdir dir="${dir.objects}"/>
+      <mkdir dir="${dir.bin}"/>
+	  <antcall target="buildVersionResource" inheritall="true">
+          <param name="internalName" value="${channelLibraryName}"/>
+	  </antcall>
+	  <!-- the ssl library is in a different place on windows ! -->
+	  <if>
+		<isset property="windows"/>
+		<then>
+			<property name="HTTP.SSLChannel.inc.dir" value="inc32"/>
+			<property name="HTTP.SSLChannel.libs" value="ssleay32,libeay32"/>
+		</then>
+		<else>
+			<property name="HTTP.SSLChannel.inc.dir" value="include"/>
+			<property name="HTTP.SSLChannel.libs" value="ssl,crypto"/>
+		</else>
+      </if>
+
+<if>
+	<equals arg1="${transport.HTTP.ipv6}" arg2="true" casesensitive="false"/>
+	<then>
+		<property name="IPV6" value="true"/>
+	</then>
+</if>
+		
+      <if>
+         <not>
+            <isset property="aix"/>
+         </not>
+         <then>
+				<!--
+				  Library name may have been change if windows debug build. Changed
+				  in buildInitialize.xml
+				  -->
+            <cc outfile="${dir.bin}/${channelLibraryName}" objdir="${dir.objects}" 
+             exceptions="true" outtype="shared" multithreaded="true">
+               <!-- Compilers -->
+               <includepath path="${HTTP.SSLChannel.dir}/${HTTP.SSLChannel.inc.dir}"/>
+               <includepath path="${HTTP.transport.IPV6.dir}/include" if="windows"/>
+               <compiler refid="SolarisCC"/>
+               <compiler refid="Linuxgcc"/>
+			   <compiler refid="HP-UXaC++"/>
+               <compiler extends="VisualC++">
+                  <defineset>
+                     <define name="AXISTRANSPORTCHANNELDLL_EXPORTS"/>
+                  </defineset>
+               </compiler>
+		<!-- required libraries -->
+		<syslibset libs="${HTTP.SSLChannel.libs}" dir="${HTTP.SSLChannel.dir}/out32dll" if="windows"/>
+		<syslibset libs="${HTTP.SSLChannel.libs}" dir="${HTTP.SSLChannel.dir}/lib" unless="windows"/>
+               <defineset>
+                  <define name="HTTPSSLCHANNEL_EXPORTS"/>
+                  <define name="OPENSSL_NO_KRB5"/>
+                  <define name="HEADER_DES_H"/>
+			<define name="IPV6" if="IPV6"/>
+               </defineset>
+                              <compiler refid="OS400icc"/>
+               <!-- Linkers -->
+               <linker refid="SolarisLinker"/>
+               <linker refid="LinuxLinker"/>
+			   <linker refid="HP-UXLinker"/>
+               <linker extends="VisualC++Linker">
+                  <syslibset libs="wsock32"/>
+               </linker>
+
+               <linker refid="OS400Linker"/>
+               <!-- Files to compile -->
+               <fileset dir="${dir.src}">
+                  <include name="transport/${transport}/${channel}/*.cpp"/>
+                  <include name="platforms/os400/PlatformSpecificOS400.cpp" if="os400"/>
+                  <include name="platforms/windows/PlatformSpecificWindows.cpp" if="windows"/>
+                  <include name="common/AxisTrace.cpp"/>
+		          <include name="transport/${transport}/URL.cpp"/>
+               </fileset>
+            </cc>
+         </then>
+         <else>
+            <cc outfile="${dir.bin}/${libraryPrefix}${channelLibraryName}${librarySuffix}" objdir="${dir.objects}"
+             exceptions="true" multithreaded="true">
+				<includepath path="${HTTP.SSLChannel.dir}/${HTTP.SSLChannel.inc.dir}"/>
+               <!-- Compilers -->
+               <compiler refid="AIXxlc"/>
+               <defineset>
+                  <define name="HTTPSSLCHANNEL_EXPORTS"/>
+                  <define name="OPENSSL_NO_KRB5"/>
+                  <define name="HEADER_DES_H"/>
+			<define name="IPV6" if="IPV6"/>
+               </defineset>
+				<!-- required libraries -->
+				<syslibset libs="${HTTP.SSLChannel.libs}" dir="${HTTP.SSLChannel.dir}/lib"/>
+
+               <!-- Linkers -->
+               <linker refid="AIXLinker"/>
+               <!-- Files to compile -->
+               <fileset dir="${dir.src}">
+                  <include name="transport/${transport}/${channel}/*.cpp"/>
+		          <include name="transport/${transport}/URL.cpp"/>
+                  <include name="common/AxisTrace.cpp"/>
+               </fileset>
+            </cc>
+         </else>
+      </if>
+   </target>
+</project>

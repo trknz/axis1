@@ -1,0 +1,24 @@
+<test>
+    <name>HandlerTest1</name>
+    <description>CalculatorDoc with a Handler which adds a BasicNode to the SOAP Header</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>CalculatorDocClient.cpp</clientCode>
+    <wsdl>CalculatorDoc.wsdl</wsdl>
+    <expected>
+        <output>
+            CalculatorDoc.cpp.out
+        </output>
+		<request>
+			HandlerTest1Request.out
+		</request>
+    </expected>
+    <handler>
+        <directory>
+            handler_test1
+        </directory>
+       <service>
+           CalculatorDoc
+       </service>
+    </handler>
+	<endpoint>http://localhost:80/axis/CalculatorDoc</endpoint>
+</test>

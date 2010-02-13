@@ -1,0 +1,27 @@
+bool=1
+byte=31
+unsigned byte=32
+short=7
+unsigned short=14
+int=21
+unsigned int=28
+long=35
+long=10000000000
+MaxInclusive long=9223372036854775807
+MinInclusive long=-9223372036854775808
+unsigned long=42
+float=35.3536
+double=70.71758889
+duration=123456789
+date=Fri Nov 12 2004
+dateTime=Fri Nov 12 07:58:43 2004
+string=never odd or even
+small string=m
+empty string = <empty string>
+integer=919191919
+decimal=929292929.55556
+base64Binary size=41
+base64Binary data=<test><xml>some dod&y string</xml></test>
+hexBinary size=41
+hexBinary data=<test><xml>some dod&y string</xml></test>
+---------------------- TEST COMPLETE -----------------------------

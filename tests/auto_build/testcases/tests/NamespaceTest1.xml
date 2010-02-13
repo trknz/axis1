@@ -1,0 +1,19 @@
+<test>
+    <name>NamespaceTest1</name>
+    <description>NamespaceTest1</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>NamespaceTest1Client.cpp</clientCode>
+    <wsdl>NamespaceTest1.wsdl</wsdl>
+    <expected>
+        <output>
+            NamespaceTest1.cpp.out
+        </output>
+        <request>
+            NamespaceTest1Request.expected
+        </request> 
+        <serverResponse>
+            NamespaceTest1ServerResponse.expected
+        </serverResponse>
+    </expected>
+	<endpoint>http://localhost:80/axis/NamespaceTest</endpoint>
+</test>

@@ -1,0 +1,54 @@
+<project name="buildLibrary" default="compileLibrary" basedir="..">
+
+	<target name="compileLibrary">
+
+		<if>
+		<not>
+			<isset property="aix"/>
+		</not>
+		<then>
+		<echo message="test.directory = ${test.directory}"/>
+			<cc failonerror="false" outfile="${test.directory}/${libraryName}" objdir="${test.directory}"
+				exceptions="true" outtype="shared" multithreaded="true">
+				<!-- Compilers -->
+				<compiler refid="SolarisCC"/>
+				<compiler refid="Linuxgcc"/>
+				<compiler refid="HP-UXaC++"/>
+				<compiler extends="VisualC++"/>
+				<compiler refid="OS400icc"/>
+				<!-- Linkers -->
+				<linker refid="SolarisLinker"/>
+				<linker refid="LinuxLinker"/>
+				<linker refid="HP-UXLinker"/>
+				<linker refid="VisualC++Linker"/>
+	            <linker extends="OS400Linker">
+		              <linkerarg location="end" value="${dir.lib}/lib${clientLibraryName.lang}.so"/>
+	            </linker>
+				
+				<libset dir="${dir.lib}" libs="${clientLibraryName.lang}" unless="os400"/>
+				<!-- Files to compile -->
+				<fileset dir="${test.directory}">
+					<include name="*.cpp"/>
+				</fileset>
+			</cc>
+		</then>
+		<else>
+			<cc failonerror="false" outfile="${test.directory}/${libraryPrefix}${libraryName}${librarySuffix}" objdir="${test.directory}"
+				exceptions="true" multithreaded="true">
+				<!-- Compilers -->
+				<compiler refid="AIXxlc"/>
+
+				<!-- Linkers -->
+				<linker refid="AIXLinker"/>
+				<libset dir="${dir.lib}" libs="${clientLibraryName.lang}"/>
+				<!-- Files to compile -->
+				<fileset dir="${test.directory}">
+					<include name="*.cpp"/>
+				</fileset>
+			</cc>
+		</else>
+		</if>
+	</target>
+
+</project>
+

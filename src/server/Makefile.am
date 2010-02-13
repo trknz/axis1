@@ -1,0 +1,2 @@
+SUBDIRS = @APACHE2BUILD@ @APACHEBUILD@ simple_axis_server
+

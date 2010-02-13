@@ -1,0 +1,172 @@
+<project name="buildTest" default="compileClient" basedir="..">
+	<import file="buildLibrary.xml"/>
+	
+	<target name="buildClient" unless="runOnly">
+		<antcall target="compileClient" inheritAll="true"/>
+	</target>
+
+	<!--
+	  Need to set a language property for wsdl2ws
+	  -->
+	<target name="setLanguage">
+		<condition property="generated.lang" value="c++">
+			<equals arg1="${test.clientLang}" arg2="cpp"/>
+		</condition>
+		<condition property="generated.lang.allheaders" value="*.hpp">
+			<equals arg1="${test.clientLang}" arg2="cpp"/>
+		</condition>
+		<condition property="clientLibraryName.lang" value="${clientLibraryName}">
+			<equals arg1="${test.clientLang}" arg2="cpp"/>
+		</condition>
+		<condition property="CommonClientTestCode.header" value="CommonClientTestCode.hpp">
+			<equals arg1="${test.clientLang}" arg2="cpp"/>
+		</condition>
+
+		<condition property="generated.lang" value="c">
+			<equals arg1="${test.clientLang}" arg2="c"/>
+		</condition>
+		<condition property="generated.lang.allheaders" value="*.h">
+			<equals arg1="${test.clientLang}" arg2="c"/>
+		</condition>
+		<condition property="clientLibraryName.lang" value="${cClientLibraryName}">
+			<equals arg1="${test.clientLang}" arg2="c"/>
+		</condition>
+		<condition property="CommonClientTestCode.header" value="CommonClientTestCode.h">
+			<equals arg1="${test.clientLang}" arg2="c"/>
+		</condition>
+	</target>
+
+	<!--
+	  Use WSDL2Ws to generate stubs from WSDL files
+	  -->
+	<target name="generateStubs" if="test.wsdl" unless="test.dynamicCode" depends="setLanguage">
+		<!-- Make directory in which all generated code shall be placed -->
+		<mkdir dir="${dir.test.generated}/${test.clientLang}/${test.name}"/>
+		<!-- Setup classpath for WSDL2Ws -->
+		<path id ="cp">
+			<fileset dir="${dir.wsdl2ws}" includes="wsdl2ws.jar"/>
+			<fileset dir="${dir.axisJARs}" includes="*.jar"/>
+		</path>
+		<!-- Run WSDL2Ws -->
+		<!-- use the following java task if client stub generation fails -->
+		<java classname="org.apache.axis.wsdl.wsdl2ws.WSDL2Ws" fork="true"> 
+		 <!-- <java jar="${dir.wsdl2ws}/wsdl2ws.jar" fork="true">-->
+			<classpath refid="cp"/>
+			<arg value="${wsdl.test}"/>
+			<arg value="-o${test.directory}"/>
+			<arg value="-l${generated.lang}"/>
+			<arg value="-sclient"/>
+		</java>
+	</target>
+
+	<!--
+	  Copy across test client, ready for compiling
+	  -->
+	<target name="getClient" depends="copyStubClient, copyDynamicClient"/>
+
+	<target name="copyStubClient" depends="generateStubs, copyClientCode" unless="test.dynamicCode"/>
+
+	<target name="copyClientCode" unless="test.dynamicCode">
+		<copy file="${client.code}" todir="${test.directory}"/>
+		<copy file="${dir.autotests}/client/${test.clientLang}/${CommonClientTestCode.header}"  todir="${test.directory}"/>
+	</target>
+
+	<target name="copyDynamicClient" if="test.dynamicCode">
+		<copy file="${dir.autotests}/client/${test.clientLang}/${CommonClientTestCode.header}"  todir="${test.directory}"/>
+		<copy todir="${test.directory}">
+			<fileset dir="${dir.autotests}/dynamic/${test.dynamicCodeDirectory}">
+				<include name="*.${test.clientLang}"/>
+				<include name="${generated.lang.allheaders}"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!--
+	  Compile test client
+	  -->
+	<target name="compileClient" depends="callCompileStaticClient, callCompileLinkedClient"/>
+
+	<target name="callCompileStaticClient" unless="test.stubAsLibrary">
+		<antcall target="compileStaticClient" inheritall="true"/>
+	</target>
+	<target name="callCompileLinkedClient" if="test.stubAsLibrary">
+		<property name="libraryName" value="${test.name}_Library"/>
+		<antcall target="compileLinkedClient" inheritall="true"/>
+	</target>
+
+	<target name="compileStaticClient" depends="getClient">
+		<cc failonerror="false" incremental="false" outfile="${test.directory}/${test.name}"
+		 objdir="${test.directory}" exceptions="true"
+		 outtype="executable" subsystem="console">
+		 	<!-- Compilers -->
+			<compiler extends="VisualC++">
+                <defineset>         
+                    <define name="Q168440_WORKAROUND" unless="msvc7" />
+                </defineset>         
+            </compiler>         
+			<compiler refid="SolarisCC"/>
+			<compiler refid="Linuxgcc"/>
+			<compiler refid="AIXxlc"/>
+            <compiler refid="HP-UXaC++"/>      
+            <compiler extends="OS400icc"> 
+ 			   <compilerarg value="-g"/> 
+                <defineset>         
+                    <define name="_LONG_LONG" />
+                </defineset>                	      	
+            </compiler>
+			<!-- Linkers -->
+			<linker refid="VisualC++Linker"/>
+			<linker refid="SolarisLinker"/>
+			<linker refid="LinuxLinker"/>
+			<linker refid="AIXExecutableLinker"/>
+            <linker refid="HP-UXLinker"/>      
+		    <linker extends="OS400ExecutableLinker">
+  		         <linkerarg location="end" value="${dir.lib}/lib${clientLibraryName.lang}.so"/>
+		    </linker>
+
+			<!-- Axis Client .lib file location, or UNIX shared object -->
+			<libset dir="${dir.lib}" libs="${clientLibraryName.lang}" unless="os400"/>
+			<!-- Files to be compiled -->
+			<includepath path="${dir.include}"/>
+			<fileset dir="${test.directory}">
+				<include name="*.${test.clientLang}"/>
+			</fileset>
+		</cc>
+	</target>
+
+	<target name="compileLinkedClient" depends="getClient, generateStubs, compileLibrary, copyClientCode">
+		<basename file="${client.code}" property="client.source"/>
+		<cc failonerror="false" incremental="false" outfile="${test.directory}/${test.name}"
+		 objdir="${test.directory}" exceptions="true"
+		 outtype="executable" subsystem="console">
+		 	<!-- Compilers -->
+			<compiler extends="VisualC++">
+            </compiler>      
+			<compiler refid="SolarisCC"/>
+			<compiler refid="Linuxgcc"/>
+			<compiler refid="AIXxlc"/>
+            <compiler refid="HP-UXaC++"/>      
+			<compiler refid="OS400icc"/>
+			<!-- Linkers -->
+			<linker refid="VisualC++Linker"/>
+			<linker refid="SolarisLinker"/>
+			<linker refid="LinuxLinker"/>
+			<linker refid="AIXExecutableLinker"/>
+            <linker refid="HP-UXLinker"/>      
+		    <linker extends="OS400ExecutableLinker">
+                <linkerarg value="-qDUPPROC"/>
+		        <linkerarg location="end" value="${dir.lib}/lib${clientLibraryName.lang}.so"/>
+		        <linkerarg location="end" value="${test.directory}/lib${libraryName}.so"/>
+		    </linker>
+			<!-- Axis Client .lib file location, or UNIX shared object -->
+			<libset dir="${dir.lib}" libs="${clientLibraryName.lang}" unless="os400"/>
+			<libset dir="${test.directory}" libs="${libraryName}" unless="os400"/>
+			<!-- Files to be compiled -->
+			<includepath path="${dir.include}"/>
+			<fileset dir="${test.directory}">
+				<include name="${client.source}"/>
+			</fileset>
+		</cc>
+	</target>
+
+</project>

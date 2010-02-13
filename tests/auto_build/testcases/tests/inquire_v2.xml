@@ -1,0 +1,14 @@
+<test>
+    <name>inquire_v2</name>
+    <description>inquire_v2</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>inquire_v2Client.cpp</clientCode>
+    <wsdl>UDDI.wsdl</wsdl>
+    <expected>
+        <output>
+            inquire_v2.cpp.out
+        </output>
+	<serverResponse>inquire_v2_ServerResponse.expected</serverResponse>
+    </expected>
+	<endpoint>http://localhost:9080/uddisoap/inquiryapi</endpoint>
+</test>

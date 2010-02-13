@@ -1,0 +1,8 @@
+non-nillable element=http://www.xyz.com
+empty non-nillable element=<empty>
+required attribute=http://www.xyz.com
+array of 2 elements
+  element[0]=http://www.xyz.com
+  element[1]=http://www.xyz.com
+within complex type=http://www.xyz.com
+---------------------- TEST COMPLETE -----------------------------

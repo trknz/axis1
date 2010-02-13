@@ -1,0 +1,16 @@
+<test>
+    <name>ExceptionTestDoc</name>
+    <description>ExceptionTestDoc</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>ExceptionTestDocClient.cpp</clientCode>
+    <wsdl>ExceptionTestDoc.wsdl</wsdl>
+    <expected>
+        <output>
+            ExceptionTestDoc.cpp.out
+        </output>
+		<serverResponse>
+			ExceptionTestDoc_ServerResponse.expected
+		</serverResponse>
+    </expected>
+	<endpoint>http://localhost:80/axis/FaultMappingDoc</endpoint>
+</test>

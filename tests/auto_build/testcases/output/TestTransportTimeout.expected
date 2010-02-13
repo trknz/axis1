@@ -1,0 +1,4 @@
+AxisParseException: Error when getting the byte stream from the transport.
+HTTPTransportException: Channel I/O operation timed out.
+Read operation timed-out while waiting for data.
+---------------------- TEST COMPLETE -----------------------------

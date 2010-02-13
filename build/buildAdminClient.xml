@@ -1,0 +1,54 @@
+<project name="AdminClient" default="compileAdminClient" basedir="..">
+
+  <!--
+       Compile the Admin Client Library
+  -->
+
+  <target name="compileAdminClient">
+    <mkdir dir="${dir.objects}"/>
+    <mkdir dir="${dir.bin}"/>
+
+    <!--
+         Library name may have been change if windows debug build. Changed in buildInitialize.xml
+    -->
+    <cc outfile="${dir.bin}/${adminClientExecutableName}"
+        objdir="${dir.objects}"
+        exceptions="true"
+        outtype="executable"
+        multithreaded="true">
+
+      <!-- Compilers -->
+      <compiler refid="SolarisCC"/>
+      <compiler refid="Linuxgcc"/>
+      <compiler refid="HP-UXaC++"/>            
+      <compiler extends="VisualC++"/>
+      <compiler refid="OS400icc"/>
+      <compiler refid="AIXxlc"/>
+
+      <!-- required libraries -->
+      <syslibset libs="${clientLibraryName}" dir="${dir.bin}" unless="os400"/>
+
+      <!-- Linkers -->
+      <linker refid="SolarisLinker"/>
+      <linker refid="LinuxLinker"/>
+      <linker refid="HP-UXLinker"/>            
+      <linker refid="VisualC++Linker"/>
+      <linker refid="AIXExecutableLinker"/>
+	  <linker extends="OS400ExecutableLinker">
+  		    <linkerarg location="end" value="${dir.bin}/lib${clientLibraryName}.so"/>
+            <linkerarg value="-qDUPPROC"/>
+			<linkerarg value="-qDUPVAR"/>
+	  </linker>
+
+          <!-- Files to be compiled -->
+      <fileset dir="${dir.src}">
+        <include name="client/adminclient/*.cpp"/>
+        <include name="platforms/windows/*.cpp" if="windows"/>
+        <include name="platforms/unix/*.cpp" if="linux"/>
+        <include name="platforms/unix/*.cpp" if="solaris"/>
+        <include name="platforms/os400/*.cpp" if="os400"/>
+        <include name="platforms/aix/*.cpp" if="aix"/>
+      </fileset>
+    </cc>
+  </target>
+</project>

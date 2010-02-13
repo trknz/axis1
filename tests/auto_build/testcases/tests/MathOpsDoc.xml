@@ -1,0 +1,14 @@
+<test>
+    <name>MathOpsDoc</name>
+    <description>MathOpsDoc</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>MathOpsDocClient.cpp</clientCode>
+    <wsdl>MathOpsDoc.wsdl</wsdl>
+    <expected>
+        <output>
+            MathOpsDoc.cpp.out
+        </output>
+		<serverResponse>MathOpsDoc_ServerResponse.expected</serverResponse>
+    </expected>
+	<endpoint>http://localhost:80/axis/MathOpsDoc</endpoint>
+</test>

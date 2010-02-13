@@ -1,0 +1,16 @@
+<test>
+    <name>Enumeration</name>
+    <description>Enumeration</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>EnumerationClient.cpp</clientCode>
+    <wsdl>Enumeration.wsdl</wsdl>
+    <expected>
+        <output>
+            Enumeration.cpp.out
+        </output>
+		<serverResponse>
+			Enumeration_ServerResponse.expected
+		</serverResponse>
+    </expected>
+	<endpoint>-e http://localhost:80/axis/Enumeration</endpoint>
+</test>

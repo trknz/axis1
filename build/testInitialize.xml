@@ -1,0 +1,108 @@
+<project name="testInitialize" default="initializeTest" basedir="..">
+
+	<property name="testProperties" value="test_properties.xml"/>
+	<property name="dir.autotests" value="${basedir}/tests/auto_build/testcases"/>
+	<property name="dir.testproperties" value="${dir.autotests}/tests"/>
+
+	<target name="initializeTest">
+		<!-- Get directory to contain log file -->
+		<dirname file="${results.log}" property="dir.results"/>
+
+		<!-- Set location of axiscpp.conf file -->
+		<condition property="axiscpp.conf" value="${axiscpp_deploy}/axiscpp.conf">
+			<isset property="windows"/>
+		</condition>
+		<condition property="axiscpp.conf" value="${axiscpp_deploy}/etc/axiscpp.conf">
+			<not>
+				<isset property="windows"/>
+			</not>
+		</condition>
+
+</target>
+
+
+	<target name="initializeLogFile">
+		<mkdir dir="${dir.results}"/>
+ 		<echo file="${results.log}" append="false"
+ 		 message="Test Results${line.separator}${line.separator}"/>
+	</target>
+
+	<!--
+	  Load the xml properties file for test and derive required properties
+	  -->
+	<target name="setPropertiesForTest" depends="loadXMLProperties,setHandlersPresent, setTestPort"/>
+	<!--,setTestName,setTestDesc,setTestCode,setClientLang,setTestWsdl,setTestEndpoint,setTestExpected,setTestExpectedRequest,setHandlerDirectory,setHandlerService,setTestPort,setTestExpectedServerResponse"/> -->
+
+	<target name="loadXMLProperties">
+		<echo message="Loading XML file ${test_property}"/>
+		<xmlproperty file="${test_property}" keepRoot="true"/>
+		<!-- If we're in mockserver mode then change the test name to show that -->
+		<!-- also do some checks to ensure that the test is really a unit test and no one has got confused :-) -->
+		<if>
+			<equals arg1="${mockServer}" arg2="true"/>
+			<then>
+				<!-- check that the serverresponse file has been set -->
+				<if>
+					<not>
+						<isset property="test.expected.serverResponse"/>
+					</not>
+					<then>
+						<echo message="in unit test mode but not got a server response file set to return"/>
+						<throw message="in unit test mode but not got a server response file set to return"/>
+					</then>
+				</if>
+				<!-- make sure the name has "unit test" in it -->
+				<propertyregex property="test.name" override="true" input="${test.name}" regexp="${test.name}" replace="UnitTest_${test.name}"/>
+				
+			</then>
+		</if>
+	</target>
+<!--	<target name="setTestName" if="test.name">
+		<propertycopy property="testName" from="test.name"/>
+	</target>
+	<target name="setTestDesc" if="test.description">
+		<propertycopy property="testDesc" from="test.description"/>
+	</target>
+	<target name="setTestCode" if="test.clientCode">
+		<propertycopy property="testCode" from="test.clientCode"/>
+	</target>
+	<target name="setClientLang" if="test.clientLang">
+		<propertycopy property="client.lang" from="test.clientLang"/>
+	</target>
+	<target name="setTestWsdl" if="test.wsdl">
+		<propertycopy property="testWsdl" from="test.wsdl"/>
+	</target>
+	<target name="setTestEndpoint" if="test.endpoint">
+		<propertycopy property="testEndpoint" from="test.endpoint"/>
+	</target>
+	<target name="setTestExpected" if="test.expected.output">
+		<propertycopy property="testExpected" from="test.expected.output"/>
+	</target>
+	<target name="setTestExpectedRequest" if="test.expected.request">
+		<propertycopy property="testExpectedRequest" from="test.expected.request"/>
+	</target>
+	<target name="setTestExpectedServerResponse" if="test.expected.serverResponse">
+		<propertycopy property="testExpectedServerResponse" from="test.expected.serverResponse"/>
+	</target>
+	
+	<target name="setHandlerDirectory" if="test.handler.directory">
+		<propertycopy property="dir.handler.chain" from="test.handler.directory"/>
+	</target>
+	<target name="setHandlerService" if="test.handler.service">
+		<propertycopy property="serviceName" from="test.handler.service"/>
+	</target>  -->
+	<target name="setTestPort" if="test.port">
+		<propertycopy property="testPort" from="test.port" override="true"/>
+	</target>
+	<!--
+	  Only set HandlersPresent if all info available
+	  -->
+	<target name="setHandlersPresent" if="test.handler.directory">
+		<condition property="HandlersPresent" value="true">
+			<isset property="test.handler.service"/>
+		</condition>
+	</target>
+	
+
+</project>
+

@@ -1,0 +1,362 @@
+<project name="executeTest" default="executeTest" basedir="..">
+
+	<!--
+		Copy the expected output test files to the generated client directory
+		and convert these files to the OS specific format so the filesmatch
+		comparison later in this script works on all platforms.
+	-->
+	<target name="setExpectations"
+		depends="setResultExpectations, setRequestExpectations, copyattachment, setServerResponse" />
+
+	<target name="setResultExpectations" unless="buildOnly">
+		<basename file="${expected.file}" property="expected.file.basename" />
+		<copy file="${dir.autotests}/output/${test.expected.output}" tofile="${expected.file}" />
+		
+		<!-- Convert to OS specific format -->
+		<fixcrlf srcdir="${test.directory}" includes="${expected.file.basename}" />
+	</target>
+
+    <!--
+		Copy the required files for attachment test from the attachment directory
+	-->
+
+
+    <target name="copyattachment" if="test.attachment" unless="buildOnly">
+		<copy file="${dir.autotests}/attachment/${test.attachment}"	todir="${test.directory}" failonerror="false" />
+	</target>
+
+
+	<!-- Only copy expected request file if it exists -->
+	<target name="setRequestExpectations" if="requestFileExists" unless="buildOnly">
+		<basename file="${r_expected.file}" property="r_expected.file.basename" />
+		<copy file="${dir.autotests}/output/${test.expected.request}" tofile="${r_expected.file}" failonerror="false" />
+		
+		<!-- Convert to OS specific format 	-->
+		<fixcrlf srcdir="${test.directory}"	includes="${r_expected.file.basename}" />
+		
+		<!--
+			change the destination host in the expected request file to match the monitor we are 
+			actually using
+		-->
+		<replaceregexp file="${r_expected.file}"
+			match="Host: [0-9a-z\.]*:[0-9]*"
+			replace="Host: 127.0.0.1:${monitorPort}" byline="true" />
+		
+		<propertyregex property="restOfURL" input="${test.endpoint}" regexp="://(.*)" select="\1" />
+
+		<propertyregex property="context" input="${restOfURL}" regexp="/(.*)" select="\1" />
+
+		<replaceregexp file="${r_expected.file}" match="POST [0-9a-zA-Z/-_]*" replace="POST /${context}" byline="true" />
+	</target>
+	
+	<!-- Only copy server response file if it exists and we are in unit test mode (mockServer mode)-->
+	<target name="setServerResponse" unless="buildOnly">
+		<if>
+			<equals arg1="${mockServer}" arg2="true" />
+			<then>
+				<basename file="${response_expected.file}" property="response_expected.file.basename" />
+				<copy
+					file="${dir.autotests}/output/${test.expected.serverResponse}"
+					tofile="${response_expected.file}" failonerror="true" />
+			</then>
+		</if>
+	</target>
+
+
+
+	<target name="setTestArgs" depends="setEndpoint, setForMonitor, setForNoMonitor, setProxyArgs" />
+
+	<target name="setEndpoint" unless="test.endpoint">
+		<property name="clientArgs" value="" />
+	</target>
+
+	<target name="setForMonitor" if="test.endpoint"	unless="test.nomonitor">
+		<propertyregex property="protocol" input="${test.endpoint}"	regexp="(.*)://" select="\1" />
+
+		<propertyregex property="restOfURL" input="${test.endpoint}" regexp="://(.*)" select="\1" />
+
+		<propertyregex property="context" input="${restOfURL}" regexp="/(.*)" select="\1" />
+
+		<property name="clientArgs" value="${protocol}://127.0.0.1:${monitorPort}/${context}" />
+	</target>
+
+	<target name="setForNoMonitor" depends="checkIfEndpointSet" if="endpoint.ok">
+
+		<propertyregex property="restOfURL" input="${test.endpoint}" regexp="://(.*)" select="\1" />
+
+		<propertyregex property="protocol" input="${test.endpoint}" regexp="(.*)://${restOfURL}" select="\1" />
+		<propertyregex property="context" input="${restOfURL}" regexp="/(.*)" select="\1" />
+
+		<property name="clientArgs"	value="${protocol}://${testHost}:${testPort}/${context}" />
+	</target>
+	
+	<target name="setProxyArgs">
+		<if>
+			<equals arg1="${test.proxyRequired}" arg2="true"/>
+			<then>
+				<propertyregex property="clientArgs" regexp="(${clientArgs})(.*)" replace="\1 ${proxy.host} ${proxy.port}" input="${clientArgs}" override="true"/>
+			</then>
+		</if>
+	</target>
+	
+	<target name="setVerbatim" if="test.verbatim">
+		<property name="clientArgs"	value="${testHost} ${testPort} ${test.endpoint}" />
+	</target>
+
+	<target name="checkIfEndpointSet" depends="setVerbatim">
+		<condition property="endpoint.ok">
+			<isset property="test.endpoint" />
+		</condition>
+		<fail message="Endpoint not specified" unless="endpoint.ok" />
+	</target>
+
+	<target name="startMonitor" unless="test.nomonitor">
+		
+		<!--  if the mockserver is on then we want to forward to localhost -->
+
+		<if>
+			<equals arg1="${mockServer}" arg2="true" />
+			<then>
+				<property name="actualTestHost" value="localhost" />
+			</then>
+			<else>
+				<property name="actualTestHost" value="${testHost}" />
+			</else>
+		</if>
+
+		<echo
+			message="Starting monitor forwarding to ${actualTestHost}:${testPort}" />
+		<!-- 
+                 Run Monitor utility to allow validation of message across the wire 
+                 Removed outputproperty="mon.out" - letting TCPMonitor write to 
+                 stdout/stderr directly since echoing the property on OS/400 results 
+                 in garbage because data is in ASCII, not EBCDIC.
+          -->
+		<antcall target="executeMonitor">
+			<param name="TCPMonitor.classname" value="org.apache.test.TCPMonitor"/>
+		</antcall>
+	</target>
+	
+	<target name="executeMonitor">
+		<monitor requestFile="${test.directory}/tcpm.req" responseFile="${test.directory}/tcpm.res" listenerPort="${monitorPort}" servicePort="${testPort}" serviceHost="${actualTestHost}"/>
+	</target>
+
+	<target name="startMockServer">
+		<echo message="Starting mockserver" />
+		<echo message = "testport = ${testPort}"/>
+		<!-- 
+                 Run Mock server utility for running unit tests 
+                 Removed outputproperty="mockServer.out" - letting MockServer write 
+                 to stdout/stderr directly since echoing the property on OS/400 results 
+                 in garbage because data is in ASCII, not EBCDIC.
+          -->
+		<mockServer port="${testPort}" responseFileName="${response_expected.file}"/>
+	</target>
+
+	<target name="stopMonitor" unless="test.nomonitor">
+		<monitor stop="true"/>
+	</target>
+
+	<target name="stopMockServer">
+		<!-- 
+		     Added fork="true" because on OS/400 this hangs without it.
+                 Removed outputproperty="stopMockServer.out" - letting stopMockServer write 
+                 to stdout/stderr directly since echoing the property on OS/400 results in 
+                 garbage because data is in ASCII, not EBCDIC.
+          -->
+		<mockServer stop="true"/>
+	</target>
+
+
+
+
+
+	<!--
+		Execute the test
+	-->
+    <target name="executeTest" depends="setExpectations,setTestArgs, createConfigurationFile, createConfigurationFileOld, updateConfigurationWithClientWSDDEntry"
+		if="successfulClientCompilation" unless="buildOnly">
+
+		<trycatch>
+			<try>
+				<!-- if we are running in mockserver mode then we need to start the MockServer -->
+				<!-- if there is already an instance of the mockserver then this will reset it to use the new responsefile -->
+				<if>
+					<equals arg1="${mockServer}" arg2="true" />
+					<then>
+						<antcall target="startMockServer" inheritall="true" />
+					</then>
+				</if>
+
+
+				<antcall target="startMonitor" inheritall="true" />
+				<echo message="Running Test ${test.name} ${clientArgs}" />
+				<!-- Run the client test -->
+				<stopwatch name="${test.name}.timer" action="start" />
+				<if>
+					<not> <isset property="test.timeout"/>	</not>
+					<then>
+						<property name="test.timeout" value="120000"/>
+					</then>
+				</if>
+				<antcall target="callClient"/>
+
+				<stopwatch name="${test.name}.timer" action="total" />
+				<propertycopy property="timer1" from="${test.name}.timer" />
+				<echo file="${results.log}" append="true" message="${test.name} - Execution Time - ${timer1}${line.separator}" />
+				<echo message="${test.name} - Execution Time - ${timer1}" />
+
+		        <if>
+		            <isfalse value="${test.nomonitor}" />
+		            <then> <monitor flush="true" /> </then>
+		        </if>				
+
+			</try>
+			<catch>
+				<echo
+					message="Exception in monitor caught it in Ant try/catch block while trying to run test ${test.name}" />
+				<antcall target="stopMonitor" inheritall="true" />
+			</catch>
+			<finally>
+				<sleep seconds="1" />
+			</finally>
+		</trycatch>
+	</target>
+	
+	<target name="callClient">
+		<!-- %XML4C_HOME%\bin;%PACKAGE_BIN%;%XMS_BIN%;%MQ_HOME%\bin;%PATH%-->
+	<exec dir="${test.directory}"
+		executable="${test.directory}/${test.name}"
+		output="${results.stdout}" error="${results.stderr}"
+		failifexecutionfails="false" timeout="${test.timeout}">
+		<arg line="${clientArgs}" />
+		<env key="PATH"
+			path="&quot;${dir.xmlParser}${path.separator}${test.directory}${path.separator}${dir.libraries}${path.separator}${java.library.path}${path.separator}${HTTP.SSLChannel.eay.dir}&quot;" />
+		<env key="LD_LIBRARY_PATH"
+			path="${dir.libraries}${path.separator}${dir.xmlParser}${path.separator}${HTTP.SSLChannel.dir}/lib${path.separator}${test.directory}" />
+		<env key="LIBPATH"
+			path="${dir.libraries}${path.separator}${dir.xmlParser}${path.separator}${HTTP.SSLChannel.dir}/lib${path.separator}${HTTP.SSLChannel.dir}/lib64${path.separator}${test.directory}" />
+        <env key="SHLIB_PATH"
+            path="${dir.libraries}${path.separator}${dir.xmlParser}${path.separator}${HTTP.SSLChannel.dir}/lib${path.separator}${HTTP.SSLChannel.dir}/lib64${path.separator}${test.directory}" />
+		<env key="AXISCPP_DEPLOY" value="${axiscpp_deploy}" />
+	</exec>
+	</target>
+
+	<!--
+		Create configuration file to use when running test
+	-->
+	<target name="createConfigurationFile" depends="checkIfDebug" if="successfulClientCompilation" unless="os400">
+		<dirname file="${axiscpp.conf}" property="confFileDirectory"/>
+
+		<mkdir dir="${confFileDirectory}"/>
+
+		<!-- Select which parser library to use -->
+		<condition property="ClientParserLib" value="${libraryPrefix}${xml4c.xmlParserLibraryName}${librarySuffix}">
+			<istrue value="${testconf.client.parser.xml4c}"/>
+		</condition>
+		<condition property="ClientParserLib" value="${libraryPrefix}${xerces.xmlParserLibraryName}${librarySuffix}">
+			<istrue value="${testconf.client.parser.xerces}"/>
+		</condition>
+
+		<if>
+			<not>
+				<istrue value="${test.ssl}"/>
+			</not>
+			<then>
+<!-- No SSL Library -->
+				<echo message="Client log, but no SSL library."/>
+				<exec executable="${dir.release}/bin/${axisConfigurationExecutableName}${executableSuffix}">
+					<arg line="Client"/>
+                    <arg line="-acd &quot;${confFileDirectory}&quot;"/>
+                    <arg line="-th  &quot;${dir.libraries}/${libraryPrefix}${transportLibraryName}${librarySuffix}&quot;"/>
+                    <arg line="-c   &quot;${dir.libraries}/${libraryPrefix}${HTTP.ChannelLibraryName}${librarySuffix}&quot;"/>
+                    <arg line="-x   &quot;${dir.libraries}/${ClientParserLib}&quot;"/>
+                    <arg line="-cl  &quot;${test.directory}/ClientLog.taw&quot;"/>
+                    <arg line="-so  &quot;${env.SSL_KEYS_HOME}/myKeyRing.kdb,axis4all,AXIS,NONE,05,NONE,false&quot;"/>
+                    <arg line="-b   false"/>
+                    <arg line="-pi  quiet"/>
+                    <arg line="-qmf off"/>
+				</exec>
+				<echo message="CONFIG COMPLETE"/>
+			</then>
+		</if>
+
+		<if>
+		    <istrue value="${test.ssl}"/>
+			<then>
+<!-- SSL Library -->
+				<echo message="Client log and SSL library."/>
+				<exec executable="${dir.release}/bin/${axisConfigurationExecutableName}${executableSuffix}">
+					<arg line="Client"/>
+                    <arg line="-acd  ${confFileDirectory}"/>
+                    <arg line="-th  ${dir.libraries}/${libraryPrefix}${transportLibraryName}${librarySuffix}"/>
+                    <arg line="-c   ${dir.libraries}/${libraryPrefix}${HTTP.ChannelLibraryName}${librarySuffix}"/>
+                    <arg line="-cs  ${dir.libraries}/${libraryPrefix}${HTTP.SecureChannelLibraryName}${librarySuffix}"/>
+                    <arg line="-x   ${dir.libraries}/${ClientParserLib}"/>
+                    <arg line="-cl  ${test.directory}/ClientLog.taw"/>
+                    <arg line="-so  &quot;${env.SSL_KEYS_HOME}/myKeyRing.kdb,axis4all,AXIS,NONE,05,NONE,false&quot;"/>
+                    <arg line="-b   false"/>
+                    <arg line="-pi  quiet"/>
+                    <arg line="-qmf off"/>
+				</exec>
+			</then>
+		</if>
+	</target>
+
+	<target name="createConfigurationFileOld" depends="checkIfDebug" if="os400">
+		<dirname file="${axiscpp.conf}" property="confFileDirectory"/>
+
+		<mkdir dir="${confFileDirectory}"/>
+
+		<!-- Select which parser library to use -->
+		<condition property="ClientParserLib" value="${libraryPrefix}${xml4c.xmlParserLibraryName}${librarySuffix}">
+			<istrue value="${testconf.client.parser.xml4c}"/>
+		</condition>
+		<condition property="ClientParserLib" value="${libraryPrefix}${xerces.xmlParserLibraryName}${librarySuffix}">
+			<istrue value="${testconf.client.parser.xerces}"/>
+		</condition>
+
+		<echo file="${axiscpp.conf}">#Available directives are as follows:
+#
+# ClientLogPath:	 The path to the client log
+# ClientWSDDFilePath:    The path to the client wsdd
+# Transport_http:	 The HTTP transport library
+# Transport_smtp:	 The SMTP transport library
+# XMLParser:		 The xml parser library
+# Channel_HTTP:          The HTTP transport channel library
+# Channel_HTTP_SSL:      The HTTP transport secure channel library
+#
+</echo>
+		<!-- Allow tracing to be turned off -->
+		<if>
+			<not>
+				<isset property="test.notrace"/>
+			</not>
+			<then>
+				<echo file="${axiscpp.conf}" append="true">
+ClientLogPath:${test.directory}/ClientLog.taw
+LogFilter:stub;engine;parser;transport;
+</echo>
+			</then>
+		</if>
+		<echo file="${axiscpp.conf}" append="true">
+Transport_http:${dir.libraries}/${libraryPrefix}${transportLibraryName}${librarySuffix}
+XMLParser:${dir.libraries}/${ClientParserLib}
+Channel_HTTP:${dir.libraries}/${libraryPrefix}${HTTP.ChannelLibraryName}${librarySuffix}
+SecureInfo:${env.SSL_KEYS_HOME}/myKeyRing.kdb,axis4all,AXIS,NONE,05,NONE,false
+</echo>
+        <if>
+            <istrue value="${test.ssl}" />
+            <then>
+                <echo file="${axiscpp.conf}" append="true">Channel_HTTP_SSL:${dir.libraries}/${libraryPrefix}${HTTP.SecureChannelLibraryName}${librarySuffix}
+</echo>	
+            </then>
+        </if>
+	</target>
+	<target name="defineMonitor">
+		<taskdef name="monitor" classname="org.apache.test.TCPMonitor" classpath="${dir.obj}/test/monitor/monitor.jar;${ant.home}/lib/ant.jar"/>
+	</target>
+	<target name="defineMockServer">
+		<taskdef name="mockServer" classname="org.apache.test.MockServer" classpath="${dir.obj}/test/monitor/monitor.jar;${ant.home}/lib/ant.jar"/>
+	</target>
+</project>

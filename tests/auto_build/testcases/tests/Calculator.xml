@@ -1,0 +1,16 @@
+<test>
+    <name>Calculator</name>
+    <description>Calculator</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>CalculatorClient.cpp</clientCode>
+    <wsdl>Calculator.wsdl</wsdl>
+    <expected>
+        <output>
+            Calculator.cpp.out
+        </output>
+		<serverResponse>
+			Calculator_ServerResponse.expected
+		</serverResponse>
+    </expected>
+	<endpoint>add 2 3 http://localhost:80/axis/Calculator</endpoint>
+</test>

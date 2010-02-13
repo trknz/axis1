@@ -1,0 +1,11 @@
+non-nillable element=A simple test message!
+non-nillable element with XML reserved characters=<>&"'
+non-nillable element with whitespace characters="some text more text"
+nillable element=A simple test message!
+nil element=<nil>
+required attribute=A simple test message!
+array of 2 elements
+  element[0]=A simple test message!
+  element[1]=A simple test message!
+within complex type=A simple test message!
+---------------------- TEST COMPLETE -----------------------------

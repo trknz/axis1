@@ -1,0 +1,17 @@
+<test>
+    <name>XSDElementNil</name>
+    <description>Test sending and receiving all the xsd types as an element</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>XSDElementNilClient.cpp</clientCode>
+    <wsdl>XSDElementNil.wsdl</wsdl>
+    <expected>
+        <output>
+            XSDElementNil.expected
+        </output>
+		<serverResponse>
+			XSDElementNil_ServerResponse.expected
+	    </serverResponse>
+    </expected>
+	<endpoint>http://localhost:80/axis/XSDElementNil</endpoint>
+</test>
+

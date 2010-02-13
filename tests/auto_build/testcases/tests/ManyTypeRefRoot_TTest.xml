@@ -1,0 +1,15 @@
+<test>
+    <name>ManyTypeRefRoot_TTest</name>
+    <description>ManyTypeRefRoot_TTest</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>ManyTypeRefRoot_TTestClient.cpp</clientCode>
+    <wsdl>ManyTypeRefRoot.wsdl</wsdl>
+    <expected>
+        <output>
+            ManyTypeRefRoot_TTest.expected
+        </output>
+    </expected>
+	<endpoint>http://localhost:80/axis/ManyTypeRefRoot</endpoint>
+	<nomonitor>true</nomonitor>
+	<notrace>true</notrace>
+</test>

@@ -1,0 +1,14 @@
+<test>
+    <name>SimpleRefDoc</name>
+    <description>SimpleRefDoc</description>
+    <clientLang>cpp</clientLang>
+    <clientCode>SimpleRefDocClient.cpp</clientCode>
+    <wsdl>SimpleRefDoc.wsdl</wsdl>
+    <expected>
+        <output>
+            SimpleRefDoc.cpp.out
+        </output>
+		<serverResponse>SimpleRefDoc_ServerResponse.expected</serverResponse>
+    </expected>
+	<endpoint>http://localhost:80/axis/SimpleRefDoc</endpoint>
+</test>

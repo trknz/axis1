@@ -1,0 +1,7 @@
+invoking echoString...
+successful
+Test transport property accessors
+First transport key = Accept-Language
+First transport value =  da, en-gb;q=0.8, en;q=0.7
+successful
+HTTP Header test end
